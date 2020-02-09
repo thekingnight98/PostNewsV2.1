@@ -19,10 +19,13 @@
         class="mx-auto mg-card"
         max-width="700"
       >
-        <v-img
-          src="https://cdn.vuetifyjs.com/images/cards/sunshine.jpg"
-          height="200px"
-        ></v-img>
+        <v-row >
+          <v-container>
+            <v-col>
+              <img :src="news.profileImg"/>
+            </v-col>
+          </v-container>
+        </v-row>
 
         <v-card-title>
           <!-- Top western road trips -->
@@ -63,8 +66,7 @@
 import axios from "axios";
 export default {
   name: "mainpage",
-  components: {
-  },
+  components: {},
   data() {
     return {
       show: false,
@@ -74,8 +76,11 @@ export default {
   mounted() {
     axios
       .get("http://localhost:5000/news")
-      .then(res => {
-        this.NewsObj = res.data;
+      .then(data => {
+        // var base64Flag = 'data:image/jpeg;base64,';
+        // var imageStr = this.arrayBufferToBase64(data.profileImg.data);
+
+        this.NewsObj = data.data;
         console.log(this.NewsObj);
       })
       .catch(err => console.log(err));
@@ -90,4 +95,15 @@ export default {
 .pd-title {
   padding: 10px;
 }
+
+img {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+  width: 400px;
+  height: 300px;
+}
+img:hover {
+  box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+} 
 </style>

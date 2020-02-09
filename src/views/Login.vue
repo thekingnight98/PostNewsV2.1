@@ -15,7 +15,6 @@
           </facebook-login>
           <img v-if="!isConnected" :src="loginImage" class="login" />
           <div v-if="isConnected" class="information">
-            
             <div class="well">
               <div class="list-item">
                 <img :src="loginImage" />
@@ -88,7 +87,7 @@ export default {
     },
     onLogout() {
       this.isConnected = false;
-      this.$store.state.personalid = null
+      this.$store.state.personalid = null;
     },
     assignToStore() {}
   }

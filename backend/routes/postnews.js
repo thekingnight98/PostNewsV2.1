@@ -1,24 +1,35 @@
-const router = require('express').Router();
+// const router = require('express').Router();
+let express = require('express'),
+    multer = require('multer'),
+    // mongoose = require('mongoose'),
+    uuidv4 = require('uuid/v4'),
+    router = express.Router();
+
+const DIR = './public/';
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, DIR);
+    },
+    filename: (req, file, cb) => {
+        const fileName = file.originalname.toLowerCase().split(' ').join('-');
+        cb(null, uuidv4() + '-' + fileName)
+    }
+});
+
+var upload = multer({
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
+            cb(null, true);
+        } else {
+            cb(null, false);
+            return cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+        }
+    }
+});
+
 let PostNews = require('../models/News.model');
-// const multer = require('multer')
-
-// const fileFilter = (req, file, cb) => {
-//     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
-//     if (!allowedTypes.includes(file.mimetype)) {
-//         const error = new Error("Incorrect file");
-//         error.code = "INCORRECT_FILETYPE";
-//         return cb(error, false)
-//     }
-//     cb(null, true);
-// }
-// const upload = multer({
-//     dest: './uploads',
-//     fileFilter,
-//     limits: {
-//         fileSize: 5000000
-//     }
-// });
-
 
 
 router.route('/').get((req, res) => {
@@ -29,42 +40,46 @@ router.route('/').get((req, res) => {
 
 
 // เพิ่ม ข่าว
+router.post('/add', upload.single('profileImg'), (req, res) => {
+    // const url = req.protocol + '://' + req.get('host')
+    const postNews = new PostNews({
+        title: req.body.title,
+        detail: req.body.detail,
+        category: req.body.category,
+        tags: req.body.tags.map(tag => tag.text),
+        // profileImg: url + '/public/' + req.file.filename
+        profileImg: req.body.profileImg
 
-// fuction upload
-// router.post('/add', upload.single('file'), async(req, res) => {
-//     // const filename = req.file != null ? req.file.filename : null
-//     const postNews = new postNews({
-//         title: req.body.title,
-//         detail: req.body.detail,
-//         category: req.body.category,
-//         file: req.file,
-//         tags: req.body.tags.map(tag => tag.text)
+    });
+    postNews.save()
+        .then(() => res.status(200).json('News added !'))
+        .catch(err => {
+            console.log(err),
+                res.status(500).json({
+                    error: err
+                });
+        })
+})
+
+// router.route('/add').post((req, res) => {
+//     const title = req.body.title;
+//     const detail = req.body.detail;
+//     const category = req.body.category;
+//     // const 
+//     const tags = req.body.tags.map(tag => tag.text);
+
+//     const postNews = new PostNews({
+//         title,
+//         detail,
+//         category,
+//         // imageUrl,
+//         tags
 //     })
-
+//     console.log(postNews);
 //     postNews.save()
 //         .then(() => res.json('News added !'))
 //         .catch(err => res.status(400).json('Error ' + err));
-// })
-
-router.route('/add').post((req, res) => {
-    const title = req.body.title;
-    const detail = req.body.detail;
-    const category = req.body.category;
-    // const 
-    const tags = req.body.tags.map(tag => tag.text);
-
-    const postNews = new PostNews({
-        title,
-        detail,
-        category,
-        // imageUrl,
-        tags
-    })
-    console.log(postNews);
-    postNews.save()
-        .then(() => res.json('News added !'))
-        .catch(err => res.status(400).json('Error ' + err));
-});
+// });
 
 // หา news by id
 router.route('/:id').get((req, res) => {

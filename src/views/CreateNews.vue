@@ -5,7 +5,7 @@
       <template>
         <v-form
           ref="form"
-          @submit.prevent="submit"
+          @submit.prevent="onSubmit"
           enctype="multipart/form-data"
           lazy-validation
         >
@@ -17,16 +17,8 @@
             required
           ></v-text-field>
           <br />
-
-          <!-- <div class="fields">
-            <label>Upload File</label><br />
-            <input type="file" ref="file" @change="onSelect" />
-          </div>
-          <div class="fields">
-            <button>Submit</button>
-          </div> -->
-          <div class="message">
-            <h5>{{ message }}</h5>
+          <div className="form-group">
+            <input type="file" ref="uploadInput" @change="onFileChange" />
           </div>
 
           <br />
@@ -186,44 +178,49 @@ export default {
             text.indexOf("{") !== -1 || text.indexOf("}") !== -1
         }
       ],
-      selectFile: null,
-      coverImageName: "",
-      file: "",
-      message: ""
+      profileImg: "",
+      photo : ''
     };
   },
   methods: {
-    onSelect() {
-      const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
-      const file = this.$refs.file.files[0];
-      this.file = file;
-      if (!allowedTypes.includes(file.type)) {
-        this.message = "Filetype is wrong!!";
+    onFileChange(e) {
+      this.profileImg  = e.target.files[0];
+
+      let reader = new FileReader();
+      // eslint-disable-next-line no-unused-vars
+      reader.onloadend = (file)=> {
+          this.profileImg = reader.result;
       }
-      if (file.size > 500000) {
-        this.message = "Too large, max size allowed is 500kb";
-      }
+
+      reader.readAsDataURL(this.profileImg);
     },
-    async onSubmit() {
-      const formData = new FormData();
-      formData.append("file", this.file);
+    onSubmit() {
+      // const formData = new FormData();
+      // formData.append("profileImg", this.profileImg);
+      // let formData = new FormData();
+      // formData.append("profileImg", this.profileImg);
       const postnews = {
         title: this.title,
         detail: this.detail,
         category: this.category,
-        file: formData,
+        profileImg: this.profileImg,
         tags: this.tags
       };
       console.log(postnews);
-      try {
-        await axios.post("http://localhost:5000/news/add", postnews);
-        // this.message = 'Uploaded!!'
-      } catch (err) {
-        console.log(err);
-        this.message = err.response.data.error;
-      }
-    },
 
+      axios.post("http://localhost:5000/news/add", postnews, {}).then(res => {
+          if (res.data) {
+            // alert("Create News Success");
+            Swal.fire({
+              icon: "success",
+              title: "Create success",
+              showConfirmButton: false,
+              timer: 1500
+            });
+          }
+          this.$router.push({ path: "/main" });
+        })
+    },
     validate() {
       if (this.$refs.form.validate()) {
         this.snackbar = true;
