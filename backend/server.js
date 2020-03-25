@@ -30,11 +30,11 @@ connection.once('open', () => {
 });
 
 const newsrouter = require('./routes/postnews');
-const User = require('./routes/user.route')
+// const User = require('./routes/user.route')
 
 
 app.use('/news', newsrouter);
-app.use('/api', User)
+// app.use('/api', User)
 
 
 app.listen(port, () => {
